@@ -15,10 +15,13 @@ import java.time.LocalDateTime;
 @Builder
 public class CourseDTO {
 
-    private Integer id;
+    private Long id;
+
     private String name;
+
     @CreatedDate
     private LocalDateTime createdDate;
+
     @LastModifiedDate
     private LocalDateTime lastModifiedDate;
 

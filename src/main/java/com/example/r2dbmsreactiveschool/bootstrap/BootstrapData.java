@@ -1,16 +1,17 @@
 package com.example.r2dbmsreactiveschool.bootstrap;
 
-import com.example.r2dbmsreactiveschool.domian.Course;
-import com.example.r2dbmsreactiveschool.domian.Student;
+import com.example.r2dbmsreactiveschool.domain.Course;
+import com.example.r2dbmsreactiveschool.domain.Student;
 import com.example.r2dbmsreactiveschool.repositories.CourseRepository;
 import com.example.r2dbmsreactiveschool.repositories.StudentRepository;
-
+import com.example.r2dbmsreactiveschool.services.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Created by jt, Spring Framework Guru.
@@ -22,73 +23,97 @@ public class BootstrapData implements CommandLineRunner {
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
 
+    private final CourseService courseService;
+
     @Override
     public void run(String... args) {
-        courseRepository.deleteAll()
-                .doOnSuccess(success -> loadCourseData())
-                .subscribe();
+        courseRepository.deleteAll().block();
+        studentRepository.deleteAll().block();
 
-        studentRepository.deleteAll()
-                .doOnSuccess(success -> loadStudentData())
-                .subscribe();
+        loadRandomData();
     }
 
-    private void loadStudentData() {
+    private void loadRandomData() {
+        final List<Course> courses = createCourses();
 
-        studentRepository.count().subscribe(count -> {
-            if (count == 0) {
-                Student student1 = Student.builder()
-                        .sName("mohammad")
-                        .sFamilyName("gholi")
-                        .sFatherName("saman")
-                        .birthDay()
-                        .createdDate(LocalDateTime.now())
-                        .lastModifiedDate(LocalDateTime.now())
-                        .build();
+        final List<Student> students = createStudents();
 
-                Student student2 = Student.builder()
-                        .sName("mosatafa")
-                        .sFamilyName("Poladi")
-                        .sFatherName("heshmat")
-                        .birthDay(LocalDate.of(1970,05,01))
-                        .createdDate(LocalDateTime.now())
-                        .lastModifiedDate(LocalDateTime.now())
-                        .build();
+        // randomly related each Course with a set of Students
+//        final Random rand = new Random(2L);
+//        for (final Course course : courses) {
+//            for (final Student student : students) {
+//                if (rand.nextBoolean()) {
+//                    course.addStudent(student);
+//                    student.addCourse(course);
+//                }
+//            }
+//        }
 
-                Student student3 = Student.builder()
-                        .sName("asghar")
-                        .sFamilyName("saboori")
-                        .sFatherName("akbar")
-                        .birthDay()
-                        .createdDate(LocalDateTime.now())
-                        .lastModifiedDate(LocalDateTime.now())
-                        .build();
+        for(int i=0; i<3; i++) {
+            Course course = courses.get(i);
+            Student student = students.get(i);
 
-                studentRepository.save(student1).subscribe();
-                studentRepository.save(student2).subscribe();
-                studentRepository.save(student3).subscribe();
-            }
-        });
+            course.addStudent(student);
+            student.addCourse(course);
+        }
+
+        for (Course course : courses) {
+            courseService.addOrUpdate(course).block();
+        }
+
+        final Course shimi = courseService.get(1L).block();
+        final Course riazi = courseService.get(2L).block();
+        final Course honar = courseService.get(3L).block();
+
+        honar.setName("jingool");
+
+        courseService.addOrUpdate(honar).block();
+
+        Course jingool = courseService.get(honar.getId()).block();
+        System.out.println(shimi);
+
     }
 
-    private void loadCourseData() {
-        courseRepository.count().subscribe(count -> {
-            if(count == 0){
-                courseRepository.save(Course.builder()
+    private List<Student> createStudents() {
+        return List.of(
+                Student.builder()
+                        .name("mohammad")
+                        .familyName("gholi")
+                        .fatherName("saman")
+                        .birthDay(LocalDate.of(1992, 2, 2))
+                        .createdDate(LocalDateTime.now())
+                        .lastModifiedDate(LocalDateTime.now())
+                        .build(),
+                Student.builder()
+                        .name("mosatafa")
+                        .familyName("Poladi")
+                        .fatherName("heshmat")
+                        .birthDay(LocalDate.of(1970, 5, 1))
+                        .createdDate(LocalDateTime.now())
+                        .lastModifiedDate(LocalDateTime.now())
+                        .build(),
+                Student.builder()
+                        .name("asghar")
+                        .familyName("saboori")
+                        .fatherName("akbar")
+                        .birthDay(LocalDate.of(1992, 4, 10))
+                        .createdDate(LocalDateTime.now())
+                        .lastModifiedDate(LocalDateTime.now())
+                        .build()
+        );
+    }
+
+    private List<Course> createCourses() {
+        return List.of(
+                Course.builder()
                         .name("shimi")
-                                .build())
-                        .subscribe();
-
-                courseRepository.save(Course.builder()
-                                .name("riazi")
-                                .build())
-                        .subscribe();
-
-                courseRepository.save(Course.builder()
-                                .name("honar")
-                                .build())
-                        .subscribe();
-            }
-        });
+                        .build()
+                , Course.builder()
+                        .name("riazi")
+                        .build(),
+                Course.builder()
+                        .name("honar")
+                        .build()
+        );
     }
 }

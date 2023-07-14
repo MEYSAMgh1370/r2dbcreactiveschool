@@ -17,12 +17,18 @@ import java.time.LocalDateTime;
 @Builder
 public class StudentDTO {
 
-    private String id;
+    private Long id;
+
     private String name;
+
     private String familyName;
+
     private String fatherName;
+
     private LocalDate birthDay;
+
     private LocalDateTime createdDate;
+
     private LocalDateTime lastModifiedDate;
 
 }

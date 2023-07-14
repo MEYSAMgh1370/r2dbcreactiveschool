@@ -1,10 +1,10 @@
 CREATE TABLE if NOT EXISTS student
 (
     id                    integer NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    student_name          varchar(255),
-    student_family_name   varchar(255),
-    student_father_name   varchar(255),
-    birthDate             timestamp,
+    `name`                varchar(255),
+    family_name           varchar(255),
+    father_name           varchar(255),
+    birth_day             timestamp,
     created_date          timestamp,
     last_modified_date    timestamp
 );
@@ -12,8 +12,8 @@ CREATE TABLE if NOT EXISTS student
 CREATE TABLE if NOT EXISTS course
 (
     id                 integer NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    course_name        varchar(255),
-    created_date       timestamp,
+    `name`               varchar(255),
+    `created_date`                timestamp,
     last_modified_date timestamp
 );
 
