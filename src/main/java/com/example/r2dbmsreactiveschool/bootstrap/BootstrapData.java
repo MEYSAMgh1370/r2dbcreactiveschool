@@ -39,15 +39,24 @@ public class BootstrapData implements CommandLineRunner {
         List<Course> courses = createCourses();
         List<Student> students = createStudents();
 
-        final Random rand = new Random(2L);
-        for (final Course course : courses) {
-            for (final Student student : students) {
-                if (rand.nextBoolean()) {
-                    course.addStudent(student);
-                    student.addCourse(course);
-                }
-            }
-        }
+//        final Random rand = new Random(2L);
+//        for (final Course course : courses) {
+//            for (final Student student : students) {
+//                if (rand.nextBoolean()) {
+//                    course.addStudent(student);
+//                    student.addCourse(course);
+//                }
+//            }
+//        }
+
+        Course firstCourse = courses.get(0);
+        Course secondCourse = courses.get(1);
+        Student firstStudent = students.get(0);
+        Student secondStudent = students.get(1);
+
+        firstCourse.addStudentAndReversed(firstStudent);
+        firstCourse.addStudentAndReversed(secondStudent);
+        secondCourse.addStudentAndReversed(secondStudent);
 
         for (Course course : courses) {
             courseService.addOrUpdateV2(course).block();
@@ -55,13 +64,13 @@ public class BootstrapData implements CommandLineRunner {
 
         final Course shimi = courseService.get(1L).block();
         final Course riazi = courseService.get(2L).block();
-        final Course honar = courseService.get(3L).block();
+//        final Course honar = courseService.get(3L).block();
 
-        honar.setName("jingool");
+        shimi.setName("jingool");
 
-        courseService.addOrUpdateV2(honar).block();
+        courseService.addOrUpdateV2(shimi).block();
 
-        Course jingool = courseService.get(honar.getId()).block();
+        Course jingool = courseService.get(shimi.getId()).block();
         System.out.println(shimi);
     }
 
@@ -142,10 +151,10 @@ public class BootstrapData implements CommandLineRunner {
                         .build()
                 , Course.builder()
                         .name("riazi")
-                        .build(),
-                Course.builder()
-                        .name("honar")
                         .build()
+//                ,Course.builder()
+//                        .name("honar")
+//                        .build()
         );
     }
 }
