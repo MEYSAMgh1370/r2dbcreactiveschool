@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by jt, Spring Framework Guru.
@@ -30,7 +31,38 @@ public class BootstrapData implements CommandLineRunner {
         courseRepository.deleteAll().block();
         studentRepository.deleteAll().block();
 
-        loadRandomData();
+//        loadRandomData();
+        loadRandomDataV2();
+    }
+
+    private void loadRandomDataV2() {
+        List<Course> courses = createCourses();
+        List<Student> students = createStudents();
+
+        final Random rand = new Random(2L);
+        for (final Course course : courses) {
+            for (final Student student : students) {
+                if (rand.nextBoolean()) {
+                    course.addStudent(student);
+                    student.addCourse(course);
+                }
+            }
+        }
+
+        for (Course course : courses) {
+            courseService.addOrUpdateV2(course).block();
+        }
+
+        final Course shimi = courseService.get(1L).block();
+        final Course riazi = courseService.get(2L).block();
+        final Course honar = courseService.get(3L).block();
+
+        honar.setName("jingool");
+
+        courseService.addOrUpdateV2(honar).block();
+
+        Course jingool = courseService.get(honar.getId()).block();
+        System.out.println(shimi);
     }
 
     private void loadRandomData() {

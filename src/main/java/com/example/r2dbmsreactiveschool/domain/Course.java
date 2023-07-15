@@ -30,6 +30,14 @@ public class Course {
     @Transient
     private List<Student> students;
 
+    public void addStudentAndReversed(final Student student) {
+        if (students == null) {
+            students = new ArrayList<>();
+        }
+        students.add(student);
+        student.addCourse(this);
+    }
+
     public void addStudent(final Student student) {
         if (students == null) {
             students = new ArrayList<>();

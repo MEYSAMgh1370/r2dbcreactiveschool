@@ -1,8 +1,10 @@
 package com.example.r2dbmsreactiveschool.services;
 
 import com.example.r2dbmsreactiveschool.domain.Course;
+import com.example.r2dbmsreactiveschool.domain.StudentCourse;
 import com.example.r2dbmsreactiveschool.domain.Student;
 import com.example.r2dbmsreactiveschool.repositories.CourseRepository;
+import com.example.r2dbmsreactiveschool.repositories.StudentCourseRepository;
 import com.example.r2dbmsreactiveschool.repositories.CustomCourseRepository;
 import com.example.r2dbmsreactiveschool.repositories.StudentRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,27 @@ public class CourseServiceImpl implements CourseService {
     private final CustomCourseRepository customCourseRepository;
 
     private final StudentRepository studentRepository;
+
+    private final StudentCourseRepository studentCourseRepository;
+
+    @Override
+    public Mono<Course> addOrUpdateV2(final Course course) {
+        return courseRepository.save(course)
+                .flatMap(savedCourse -> {
+                    return studentRepository.saveAll(course.getStudents())
+                            .collectList()
+                            .flatMap(savedStudents -> {
+                                List<StudentCourse> studentCourses = savedStudents.stream()
+                                        .map(savedStudent -> new StudentCourse(savedCourse.getId(), savedStudent.getId()))
+                                        .toList();
+                                savedStudents.forEach(course::addStudentAndReversed);
+
+                                studentCourses.forEach(studentCourseRepository::save);
+                                return studentCourseRepository.saveAll(studentCourses)
+                                        .then(Mono.just(savedCourse));
+                            });
+                });
+    }
 
     @Override
     public Mono<Course> addOrUpdate(final Course newCourse) {
