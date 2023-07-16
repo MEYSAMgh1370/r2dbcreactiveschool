@@ -8,11 +8,11 @@ import com.example.r2dbmsreactiveschool.services.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by jt, Spring Framework Guru.
@@ -28,50 +28,11 @@ public class BootstrapData implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        courseRepository.deleteAll().block();
-        studentRepository.deleteAll().block();
+;
+        Mono.zip(studentRepository.deleteAll(),courseRepository.deleteAll())
+                        .doOnSuccess(varr -> loadRandomData())
+                .subscribe();
 
-//        loadRandomData();
-        loadRandomDataV2();
-    }
-
-    private void loadRandomDataV2() {
-        List<Course> courses = createCourses();
-        List<Student> students = createStudents();
-
-//        final Random rand = new Random(2L);
-//        for (final Course course : courses) {
-//            for (final Student student : students) {
-//                if (rand.nextBoolean()) {
-//                    course.addStudent(student);
-//                    student.addCourse(course);
-//                }
-//            }
-//        }
-
-        Course firstCourse = courses.get(0);
-        Course secondCourse = courses.get(1);
-        Student firstStudent = students.get(0);
-        Student secondStudent = students.get(1);
-
-        firstCourse.addStudentAndReversed(firstStudent);
-        firstCourse.addStudentAndReversed(secondStudent);
-        secondCourse.addStudentAndReversed(secondStudent);
-
-        for (Course course : courses) {
-            courseService.addOrUpdateV2(course).block();
-        }
-
-        final Course shimi = courseService.get(1L).block();
-        final Course riazi = courseService.get(2L).block();
-//        final Course honar = courseService.get(3L).block();
-
-        shimi.setName("jingool");
-
-        courseService.addOrUpdateV2(shimi).block();
-
-        Course jingool = courseService.get(shimi.getId()).block();
-        System.out.println(shimi);
     }
 
     private void loadRandomData() {
@@ -79,16 +40,6 @@ public class BootstrapData implements CommandLineRunner {
 
         final List<Student> students = createStudents();
 
-        // randomly related each Course with a set of Students
-//        final Random rand = new Random(2L);
-//        for (final Course course : courses) {
-//            for (final Student student : students) {
-//                if (rand.nextBoolean()) {
-//                    course.addStudent(student);
-//                    student.addCourse(course);
-//                }
-//            }
-//        }
 
         for(int i=0; i<3; i++) {
             Course course = courses.get(i);
@@ -99,19 +50,10 @@ public class BootstrapData implements CommandLineRunner {
         }
 
         for (Course course : courses) {
-            courseService.addOrUpdate(course).block();
+            courseService.addOrUpdate(course).subscribe();
         }
 
-        final Course shimi = courseService.get(1L).block();
-        final Course riazi = courseService.get(2L).block();
-        final Course honar = courseService.get(3L).block();
 
-        honar.setName("jingool");
-
-        courseService.addOrUpdate(honar).block();
-
-        Course jingool = courseService.get(honar.getId()).block();
-        System.out.println(shimi);
 
     }
 
@@ -151,10 +93,10 @@ public class BootstrapData implements CommandLineRunner {
                         .build()
                 , Course.builder()
                         .name("riazi")
+                        .build(),
+                Course.builder()
+                        .name("honar")
                         .build()
-//                ,Course.builder()
-//                        .name("honar")
-//                        .build()
         );
     }
 }

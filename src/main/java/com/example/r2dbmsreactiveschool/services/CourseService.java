@@ -10,9 +10,8 @@ public interface CourseService {
 
     Mono<Course> addOrUpdate(final Course course);
 
-    Mono<Course> addOrUpdateV2(final Course course);
-
     Mono<Course> get(Long courseId);
 
     Flux<Course> getByIds(List<Long> courseIds);
+
 }
